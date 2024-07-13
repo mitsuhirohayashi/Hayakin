@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資産予想ルックアップ - P5.js版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let dateInput;
+        let amountDisplay;
+        let milestones;
+
+        function setup() {
+            createCanvas(400, 300);
+            background(240);
+
+            milestones = [
+                { date: new Date('2024-07-01'), amount: 40000000 },
+                { date: new Date('2024-08-15'), amount: 50000000 },
+                { date: new Date('2024-10-01'), amount: 60000000 },
+                { date: new Date('2024-11-15'), amount: 70000000 },
+                { date: new Date('2025-01-01'), amount: 80000000 },
+                { date: new Date('2025-02-15'), amount: 90000000 },
+                { date: new Date('2025-03-15'), amount: 100000000 },
+                { date: new Date('2025-04-20'), amount: 110000000 },
+                { date: new Date('2025-06-01'), amount: 120000000 },
+                { date: new Date('2025-07-01'), amount: 130000000 },
+                { date: new Date('2025-08-01'), amount: 140000000 },
+                { date: new Date('2025-09-01'), amount: 150000000 },
+                { date: new Date('2025-10-01'), amount: 160000000 },
+                { date: new Date('2025-11-01'), amount: 170000000 },
+                { date: new Date('2025-11-15'), amount: 180000000 },
+                { date: new Date('2025-12-15'), amount: 190000000 },
+                { date: new Date('2026-01-01'), amount: 200000000 },
+            ];
+
+            dateInput = createInput();
+            dateInput.position(width / 2 - 75, height / 2 - 40);
+            dateInput.size(150, 25);
+            dateInput.attribute('type', 'date');
+            dateInput.attribute('min', '2024-07-01');
+            dateInput.attribute('max', '2026-01-01');
+            dateInput.changed(updateAmount);
+
+            amountDisplay = createP('');
+            amountDisplay.position(width / 2 - 75, height / 2 + 10);
+            amountDisplay.style('font-size', '18px');
+            amountDisplay.style('font-weight', 'bold');
+        }
+
+        function draw() {
+            background(240);
+            fill(0);
+            textAlign(CENTER, CENTER);
+            textSize(20);
+            text('資産予想ルックアップ', width / 2, 30);
+
+            textSize(14);
+            text('日付を選択してください:', width / 2, height / 2 - 60);
+        }
+
+        function updateAmount() {
+            let selectedDate = new Date(dateInput.value());
+            let amount = calculateAmount(selectedDate);
+
+            if (amount !== null) {
+                amountDisplay.html('予想資産額: ' + formatCurrency(amount));
+            } else {
+                amountDisplay.html('指定された日付の予想額はありません。');
+            }
+        }
+
+        function calculateAmount(inputDate) {
+            if (inputDate < milestones[0].date || inputDate > milestones[milestones.length - 1].date) {
+                return null;
+            }
+
+            let start = milestones[0];
+            let end = milestones[milestones.length - 1];
+
+            for (let i = 0; i < milestones.length - 1; i++) {
+                if (inputDate >= milestones[i].date && inputDate < milestones[i + 1].date) {
+                    start = milestones[i];
+                    end = milestones[i + 1];
+                    break;
+                }
+            }
+
+            const totalDays = (end.date - start.date) / (1000 * 60 * 60 * 24);
+            const daysElapsed = (inputDate - start.date) / (1000 * 60 * 60 * 24);
+            const amountDiff = end.amount - start.amount;
+
+            return Math.round(start.amount + (amountDiff * (daysElapsed / totalDays)));
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
+        }
+    </script>
+</body>
+</html>
